@@ -37,7 +37,7 @@ The bucket name should be in the output. Please use that to configure the Terraf
 
 ## Installation
 
-The terraform code is loosely based on [this EKS managed Node Group TF example](https://github.com/terraform-aws-modules/terraform-aws-eks/tree/master/examples/eks_managed_node_group).
+The terraform code is loosely based on [this EKS managed Node Group TF example](https://github.com/terraform-aws-modules/terraform-aws-eks/tree/master/examples/eks-managed-node-group).
 
 **Note**: Applying the Terraform means you are creating cloud infrastructure which actually costs you money. The authors are not responsible for any cost coming from following the instructions below.
 
@@ -94,6 +94,10 @@ Do the following:
 
 Note that you might have to do some manual cleanups after that.
 
+#### TLS
+
+You might want to set up TLS. For that, refer to the [AWS documentation](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.8/guide/ingress/annotations/#tls).
+
 ## Running Terratest
 
 Want to see if the setup still works? You can use terratest to check if the current setup works via automated terratest tests, for this you need to make sure that you have installed terraform and Go version 1.21. Next, you will need to install the modules and set up credentials.
@@ -111,7 +115,7 @@ The documentation below is auto-generated to give insight on what's created via 
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.43.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.56.1 |
 | <a name="requirement_http"></a> [http](#requirement\_http) | ~> 3.4.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.6.0 |
 
@@ -119,17 +123,17 @@ The documentation below is auto-generated to give insight on what's created via 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.43.0 |
-| <a name="provider_http"></a> [http](#provider\_http) | 3.4.2 |
-| <a name="provider_random"></a> [random](#provider\_random) | 3.6.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 5.56.1 |
+| <a name="provider_http"></a> [http](#provider\_http) | 3.4.3 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.6.2 |
 
 ## Modules
 
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_ebs_csi_irsa_role"></a> [ebs\_csi\_irsa\_role](#module\_ebs\_csi\_irsa\_role) | terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks | ~> 5.5 |
-| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.8.4 |
-| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | ~> 5.7.0 |
+| <a name="module_eks"></a> [eks](#module\_eks) | terraform-aws-modules/eks/aws | 20.15.0 |
+| <a name="module_vpc"></a> [vpc](#module\_vpc) | terraform-aws-modules/vpc/aws | ~> 5.8.1 |
 
 ## Resources
 

@@ -6,7 +6,7 @@
 
 [![Java checkstyle and testing](https://github.com/OWASP/wrongsecrets/actions/workflows/main.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/main.yml) [![Pre-commit](https://github.com/OWASP/wrongsecrets/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/pre-commit.yml) [![Terraform FMT](https://github.com/OWASP/wrongsecrets/actions/workflows/terraform.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/terraform.yml) [![CodeQL](https://github.com/OWASP/wrongsecrets/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/codeql-analysis.yml) [![Dead Link Checker](https://github.com/OWASP/wrongsecrets/actions/workflows/link_checker.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/link_checker.yml)[![Javadoc and Swaggerdoc generator](https://github.com/OWASP/wrongsecrets/actions/workflows/java_swagger_doc.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/java_swagger_doc.yml) [![Test Heroku with cypress](https://github.com/OWASP/wrongsecrets/actions/workflows/heroku_tests.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/heroku_tests.yml)
 
-[![Test minikube script (k8s)](https://github.com/OWASP/wrongsecrets/actions/workflows/minikube-k8s-test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/minikube-k8s-test.yml) [![Test minikube script (k8s&vault)](https://github.com/OWASP/wrongsecrets/actions/workflows/minikube-vault-test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/minikube-vault-test.yml) [![Docker container test](https://github.com/OWASP/wrongsecrets/actions/workflows/container_test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/container_test.yml)[![Test container on podman and Colima](https://github.com/OWASP/wrongsecrets/actions/workflows/container-alts-test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/container-alts-test.yml)
+[![Test minikube script (k8s)](https://github.com/OWASP/wrongsecrets/actions/workflows/minikube-k8s-test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/minikube-k8s-test.yml) [![Test minikube script (k8s&vault)](https://github.com/OWASP/wrongsecrets/actions/workflows/minikube-vault-test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/minikube-vault-test.yml) [![Docker container test](https://github.com/OWASP/wrongsecrets/actions/workflows/container_test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/container_test.yml)[![Test container on podman](https://github.com/OWASP/wrongsecrets/actions/workflows/container-alts-test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/container-alts-test.yml)
 [![DAST with ZAP](https://github.com/OWASP/wrongsecrets/actions/workflows/dast-zap-test.yml/badge.svg)](https://github.com/OWASP/wrongsecrets/actions/workflows/dast-zap-test.yml)
 
 [![OWASP Production Project](https://img.shields.io/badge/OWASP-production%20project-48A646.svg)](https://owasp.org/projects/)
@@ -160,7 +160,7 @@ Make sure you have the following installed:
 -   Docker [Install from here](https://docs.docker.com/get-docker/)
 -   Minikube [Install from here](https://minikube.sigs.k8s.io/docs/start/)
 
-The K8S setup currently is based on using Minikube for local fun:
+The K8S setup currently is based on using Minikube for local fun. You can use the commands below from the root of the project:
 
 ```bash
     minikube start
@@ -171,6 +171,12 @@ The K8S setup currently is based on using Minikube for local fun:
     while [[ $(kubectl get pods -l app=secret-challenge -o 'jsonpath={..status.conditions[?(@.type=="Ready")].status}') != "True" ]]; do echo "waiting for secret-challenge" && sleep 2; done
     kubectl expose deployment secret-challenge --type=LoadBalancer --port=8080
     minikube service secret-challenge
+```
+
+Alternatively you can do :
+
+```bash
+    ./k8s-vault-minkube-start.sh
 ```
 
 now you can use the provided IP address and port to further play with the K8s variant (instead of localhost).
@@ -419,6 +425,8 @@ export SPRING_CLOUD_VAULT_URI='http://127.0.0.1:8200'
 export SPRING_CLOUD_VAULT_TOKEN='<TOKENHERE>'
 vault token create -id="00000000-0000-0000-0000-000000000000" -policy="root"
 vault kv put secret/secret-challenge vaultpassword.password="$(openssl rand -base64 16)"
+vault kv put secret/injected vaultinjected.value="$(openssl rand -base64 16)"
+vault kv put secret/codified challenge47secret.value="debugvalue"
 ```
 
 Now use the `local-vault` profile to do your development.
@@ -542,60 +550,14 @@ Note: be careful with trying to deploy the `jeroenwillemsen/wrongsecrets-desktop
 
 ## Docker on macOS with M1 and Colima (Experimental!)
 
-NOTE: Colima support is experimental.
+NOTE: We do not officially support Colima, as we can tell that Github runners have loads of issues with it.
 
-Using [Colima](https://github.com/abiosoft/colima) (version 0.5.2 when written) you your macOS with Apple Silicon M1
+If you cannot switch to Docker Desktop/Podman and you want to use Colima with Apple Silicon M1
 to run Docker image `jeroenwillemsen/wrongsecrets` you try one of:
 
-- switch off Colima
-- change Docker context
-- run Colima with 1 CPU
-
-### Switch off Colima
-
-```shell
-colima stop
-```
-and run natively Docker image `jeroenwillemsen/wrongsecrets` on ARM.
-
-### Change Docker context
-
-Running docker image on Colima container runtimes on macOS Ventura with M1 CPU can run very slowly or can hang at some point.
-Wrong Secrets provide `arm64` Docker image and switching to `desktop-linux` context will use the native `arm64` image.
-To do that in the terminal run:
-
-```shell
-docker context ls
-```
-
-you should see context default `colima *`:
-
-```
-NAME                TYPE                DESCRIPTION                               DOCKER ENDPOINT                                    KUBERNETES ENDPOINT                ORCHESTRATOR
-colima *            moby                colima                                    unix:///Users/YOUR_USER_NAME/.colima/default/docker.sock
-default             moby                Current DOCKER_HOST based configuration   unix:///var/run/docker.sock                        https://127.0.0.1:6443 (default)   swarm
-desktop-linux       moby                                                          unix:///Users/YOUR_USER_NAME/.docker/run/docker.sock
-```
-
-Now run one of the above Docker commands together with `--context` switch e.g.:
-
-```bash
-docker --context desktop-linux run -p 8080:8080 jeroenwillemsen/wrongsecrets:latest-no-vault
-```
-
-### Run Colima with 1 CPU
-
-Colima is using QEMU behind and for QEMU on Apple Silicon M1 is recommended to use 1 CPU core:
-
-```shell
-colima start -m 8 -c 1 --arch x86_64
-```
-
-and run with AMD x64 emulation e.g.:
-
-```bash
-docker run -p 8080:8080 jeroenwillemsen/wrongsecrets:latest-no-vault
-```
+- switch off Colima (`colima stop`)
+- change Docker context (`docker --context desktop-linux run -p 8080:8080 jeroenwillemsen/wrongsecrets:latest-no-vault`)
+- run Colima with 1 CPU (`colima start -m 8 -c 1 --arch x86_64`)
 
 ## Want to disable challenges in your own release?
 
